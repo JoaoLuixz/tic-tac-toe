@@ -9,6 +9,7 @@ function changeCurrentPlayer(
   currentPlayer: Player,
   setCurrentPlayer: React.Dispatch<React.SetStateAction<Player>>
 ) {
+  console.log("iae2");
   setCurrentPlayer(
     players.filter((player) => player.name !== currentPlayer.name)[0]
   );
@@ -38,15 +39,20 @@ function registerPlay(
   console.log(tile);
   if (board[tile.y][tile.x] === "X" || board[tile.y][tile.x] === "Y")
     return board;
-  console.log("iae");
 
   const newBoard = board;
+  console.log(+newBoard[tile.y][tile.x]);
 
-  setCurrenPlayer((player) => ({
-    ...player,
-    ownedTiles: [...player.ownedTiles, +newBoard[tile.y][tile.x]],
-  }));
-  console.log(player.name, player.ownedTiles);
+  setCurrenPlayer((player) => {
+    const newPlayer = {
+      ...player,
+      ownedTiles: [...player.ownedTiles, +newBoard[tile.y][tile.x]],
+    };
+
+    console.log(newPlayer.name, newPlayer.ownedTiles);
+
+    return newPlayer;
+  });
 
   newBoard[tile.y][tile.x] = player.simbol;
 
@@ -71,10 +77,11 @@ function App() {
   useEffect(() => {
     if (checkWin(currentPlayer)) {
       setWinner(currentPlayer);
+      console.log(winner);
       return;
     }
     changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
-  }, [players]);
+  }, [board]);
 
   return (
     <div>
@@ -95,13 +102,14 @@ function App() {
                       board
                     )
                   );
-
-                  setPlayers((players) => [
-                    players.find(
-                      (player) => player.name !== currentPlayer.name
-                    )!,
-                    currentPlayer,
-                  ]);
+                  console.log(players);
+                  setPlayers((players) => {
+                    if (currentPlayer.name === "P1") {
+                      return [currentPlayer, players[1]];
+                    } else {
+                      return [players[0], currentPlayer];
+                    }
+                  });
                 }}
               >{`${column}`}</div>
             ))}
