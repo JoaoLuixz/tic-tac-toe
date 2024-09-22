@@ -9,17 +9,17 @@ function changeCurrentPlayer(
   currentPlayer: Player,
   setCurrentPlayer: React.Dispatch<React.SetStateAction<Player>>
 ) {
-  //console.log("iae2");
-  console.log(currentPlayer);
   setCurrentPlayer(
     players.find((player) => player.name !== currentPlayer.name)!
   );
 }
 
 function checkWin({ ownedTiles }: Player): boolean {
+  console.log("owned tiles", ownedTiles);
+
   if (ownedTiles.length < 3) return false;
 
-  console.log("owned tiles", ownedTiles);
+  console.log("WINNER");
 
   const tilesTotal = ownedTiles.reduce((sum, tileValue) => sum + tileValue, 0);
 
@@ -35,7 +35,7 @@ function checkWin({ ownedTiles }: Player): boolean {
 
 function registerPlay(
   player: Player,
-  setCurrenPlayer: React.Dispatch<React.SetStateAction<Player>>,
+  setPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
   tile: { x: number; y: number },
   board: string[][]
 ): string[][] {
@@ -47,18 +47,25 @@ function registerPlay(
 
   const tileValue = +newBoard[tile.y][tile.x];
 
-  setCurrenPlayer((player) => {
-    const newPlayer: Player = {
-      ...player,
-      ownedTiles: [...player.ownedTiles, tileValue],
-    };
+  setPlayers((players) => {
+    let newPlayers: Player[];
 
-    console.log(newPlayer.name, newPlayer.ownedTiles);
-
-    return newPlayer;
+    if (player.name === "P1") {
+      newPlayers = [
+        { ...player, ownedTiles: [...player.ownedTiles, tileValue] },
+        players[1],
+      ];
+    } else {
+      newPlayers = [
+        players[0],
+        { ...player, ownedTiles: [...player.ownedTiles, tileValue] },
+      ];
+    }
+    return newPlayers;
   });
 
   newBoard[tile.y][tile.x] = player.simbol;
+
   return newBoard;
 }
 
@@ -73,21 +80,13 @@ function App() {
     { name: "P1", simbol: "X", ownedTiles: [] },
     { name: "P2", simbol: "O", ownedTiles: [] },
   ]);
-  const [currentPlayer, setCurrentPlayer] = useState<Player>(players[1]);
+
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(players[0]);
 
   const [winner, setWinner] = useState<Player>();
-
   useEffect(() => {
-    console.log("useEffect");
-    if (checkWin(currentPlayer)) {
-      setWinner(currentPlayer);
-      console.log(winner);
-      return;
-    }
-
-    changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
-  }, [players]);
-
+    if (checkWin(currentPlayer)) setWinner(currentPlayer);
+  }, [board]);
   return (
     <div>
       {currentPlayer.name}
@@ -99,22 +98,19 @@ function App() {
                 key={`column-${columnIndex}`}
                 className="cursor-pointer p-2"
                 onClick={() => {
-                  setBoard(
+                  if (checkWin(currentPlayer)) {
+                    setWinner(currentPlayer);
+                  }
+                  setBoard((board) =>
                     registerPlay(
                       currentPlayer,
-                      setCurrentPlayer,
+                      setPlayers,
                       { y: rowIndex, x: columnIndex },
                       board
                     )
                   );
 
-                  console.log(players);
-
-                  setPlayers((players) =>
-                    currentPlayer.name === "P1"
-                      ? [currentPlayer, players[1]]
-                      : [players[0], currentPlayer]
-                  );
+                  changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
                 }}
               >{`${column}`}</div>
             ))}
