@@ -9,14 +9,17 @@ function changeCurrentPlayer(
   currentPlayer: Player,
   setCurrentPlayer: React.Dispatch<React.SetStateAction<Player>>
 ) {
-  console.log("iae2");
+  //console.log("iae2");
+  console.log(currentPlayer);
   setCurrentPlayer(
-    players.filter((player) => player.name !== currentPlayer.name)[0]
+    players.find((player) => player.name !== currentPlayer.name)!
   );
 }
 
 function checkWin({ ownedTiles }: Player): boolean {
   if (ownedTiles.length < 3) return false;
+
+  console.log("owned tiles", ownedTiles);
 
   const tilesTotal = ownedTiles.reduce((sum, tileValue) => sum + tileValue, 0);
 
@@ -37,16 +40,17 @@ function registerPlay(
   board: string[][]
 ): string[][] {
   console.log(tile);
-  if (board[tile.y][tile.x] === "X" || board[tile.y][tile.x] === "Y")
+  if (board[tile.y][tile.x] === "X" || board[tile.y][tile.x] === "O")
     return board;
 
   const newBoard = board;
-  console.log(+newBoard[tile.y][tile.x]);
+
+  const tileValue = +newBoard[tile.y][tile.x];
 
   setCurrenPlayer((player) => {
-    const newPlayer = {
+    const newPlayer: Player = {
       ...player,
-      ownedTiles: [...player.ownedTiles, +newBoard[tile.y][tile.x]],
+      ownedTiles: [...player.ownedTiles, tileValue],
     };
 
     console.log(newPlayer.name, newPlayer.ownedTiles);
@@ -55,7 +59,6 @@ function registerPlay(
   });
 
   newBoard[tile.y][tile.x] = player.simbol;
-
   return newBoard;
 }
 
@@ -75,13 +78,15 @@ function App() {
   const [winner, setWinner] = useState<Player>();
 
   useEffect(() => {
+    console.log("useEffect");
     if (checkWin(currentPlayer)) {
       setWinner(currentPlayer);
       console.log(winner);
       return;
     }
+
     changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
-  }, [board]);
+  }, [players]);
 
   return (
     <div>
@@ -102,14 +107,14 @@ function App() {
                       board
                     )
                   );
+
                   console.log(players);
-                  setPlayers((players) => {
-                    if (currentPlayer.name === "P1") {
-                      return [currentPlayer, players[1]];
-                    } else {
-                      return [players[0], currentPlayer];
-                    }
-                  });
+
+                  setPlayers((players) =>
+                    currentPlayer.name === "P1"
+                      ? [currentPlayer, players[1]]
+                      : [players[0], currentPlayer]
+                  );
                 }}
               >{`${column}`}</div>
             ))}
