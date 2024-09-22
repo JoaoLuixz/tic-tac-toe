@@ -84,9 +84,10 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = useState<Player>(players[0]);
 
   const [winner, setWinner] = useState<Player>();
+
   useEffect(() => {
     if (checkWin(currentPlayer)) setWinner(currentPlayer);
-  }, [board]);
+  }, [players]);
   return (
     <div>
       {currentPlayer.name}
@@ -98,9 +99,8 @@ function App() {
                 key={`column-${columnIndex}`}
                 className="cursor-pointer p-2"
                 onClick={() => {
-                  if (checkWin(currentPlayer)) {
-                    setWinner(currentPlayer);
-                  }
+                  if (winner) return;
+
                   setBoard((board) =>
                     registerPlay(
                       currentPlayer,
@@ -110,6 +110,10 @@ function App() {
                     )
                   );
 
+                  if (checkWin(currentPlayer)) {
+                    setWinner(currentPlayer);
+                    return;
+                  }
                   changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
                 }}
               >{`${column}`}</div>
