@@ -122,12 +122,30 @@ function registerPlay(
   player: Player,
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
   tile: { x: number; y: number },
-  board: string[][]
+  board: string[][],
+  setSelectedTile: React.Dispatch<
+    React.SetStateAction<
+      | {
+          y: number;
+          x: number;
+        }
+      | undefined
+    >
+  >
 ): string[][] {
   if (board[tile.y][tile.x] === "X" || board[tile.y][tile.x] === "O")
     return board;
 
   const newBoard = board;
+
+  if (player.ownedTiles.length >= 3) {
+    const olderPlay = player.ownedTiles.shift();
+
+    setSelectedTile(olderPlay);
+
+    // @ts-ignore
+    newBoard[olderPlay.y][olderPlay.x] = undefined;
+  }
 
   setPlayers((players) => {
     let newPlayers: Player[];
@@ -162,6 +180,8 @@ function App() {
     { name: "P1", symbol: "X", ownedTiles: [] },
     { name: "P2", symbol: "O", ownedTiles: [] },
   ]);
+
+  const [selectedTile, setSelectedTile] = useState<{ y: number; x: number }>();
 
   const [currentPlayer, setCurrentPlayer] = useState<Player>(players[1]);
 
@@ -205,7 +225,15 @@ function App() {
                       ? "border-l"
                       : "border-x"
                   }
-                    `}
+                   
+                  ${
+                    selectedTile?.y === rowIndex &&
+                    selectedTile.x === columnIndex
+                      ? currentPlayer.name === "P1"
+                        ? "bg-red-600"
+                        : "text-blue-600"
+                      : ""
+                  }`}
                   onClick={() => {
                     if (winner) return;
 
@@ -214,7 +242,8 @@ function App() {
                         currentPlayer,
                         setPlayers,
                         { y: rowIndex, x: columnIndex },
-                        board as string[][]
+                        board as string[][],
+                        setSelectedTile
                       );
 
                       console.log("iae");
@@ -244,6 +273,7 @@ function App() {
               );
               setWinner(undefined);
               setCurrentPlayer(players[0]);
+              setSelectedTile(undefined);
             }}
           >
             Reset
