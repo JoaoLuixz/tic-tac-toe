@@ -81,15 +81,12 @@ function checkWin({ ownedTiles }: Player, board: string[][]): boolean {
 
   // line win
   if (
-    (board[0][0] === board[0][1] &&
-      board[0][1] === board[0][2] &&
-      board[0][2]) ||
+    (board[0][0] === board[0][1] && board[0][1] === board[0][2]) ||
     (board[1][0] === board[1][1] &&
       board[1][1] === board[1][2] &&
       board[1][2]) ||
     (board[2][0] === board[2][1] && board[2][1] === board[2][2] && board[2][2])
   ) {
-    console.log("WINNER");
     return true;
   }
 
@@ -100,18 +97,19 @@ function checkWin({ ownedTiles }: Player, board: string[][]): boolean {
       board[2][2]) ||
     (board[2][0] === board[1][1] && board[1][1] === board[0][2] && board[0][2])
   ) {
-    console.log("winner");
     return true;
   }
 
   // vertical win
   if (
+    (board[0][0] === board[1][0] &&
+      board[1][0] === board[2][0] &&
+      board[2][0]) ||
     (board[0][1] === board[1][1] &&
       board[1][1] === board[2][1] &&
       board[2][1]) ||
-    (board[1][0] === board[1][1] && board[1][1] === board[1][2] && board[1][2])
+    (board[0][2] === board[1][2] && board[1][2] === board[2][2] && board[2][2])
   ) {
-    console.log("winner");
     return true;
   }
 
@@ -128,8 +126,6 @@ function registerPlay(
     return board;
 
   const newBoard = board;
-
-  // const tileValue = +newBoard[tile.y][tile.x];
 
   setPlayers((players) => {
     let newPlayers: Player[];
@@ -167,26 +163,20 @@ function App() {
 
   const [currentPlayer, setCurrentPlayer] = useState<Player>(players[1]);
 
-  const [winner, setWinner] = useState<Player>();
+  const [winner, setWinner] = useState<Player | { name: "Tie" }>();
 
   useEffect(() => {
-    console.log(currentPlayer.name);
-
-    // if (checkWin(currentPlayer, board as string[][])) {
-    //   setWinner(currentPlayer);
-    //   return;
-    // }
-
+    if (winner) return;
+    if (board.flat().every((tile) => tile !== undefined)) {
+      setWinner({ name: "Tie" });
+    }
     changeCurrentPlayer(players, currentPlayer, setCurrentPlayer);
   }, [players]);
 
   return (
-    <div className=" flex flex-col gap-10 items-center justify-center">
-      <div className="space-y-10">
-        <p className="text-center">{currentPlayer.name}</p>
-        {winner && (
-          <div className="bg-blue-600 rounded-md p-2">WINNER:{winner.name}</div>
-        )}
+    <div className="flex flex-col gap-10 items-center justify-center h-screen">
+      <div className="space-y-20">
+        <p className="text-center text-4xl">{currentPlayer.name}</p>
       </div>
       <div>
         <div className="flex justify-center items-center gap-10">
@@ -224,6 +214,23 @@ function App() {
           ))}
         </div>
       </div>
+      {winner && (
+        <div className="p-2 flex flex-col gap-2">
+          <p className="bg-green-600 rounded-md p-2">WINNER: {winner.name} </p>
+          <button
+            className="bg-blue-600 rounded-md p-2"
+            onClick={() => {
+              setBoard(
+                Array.from({ length: 3 }).map(() => Array.from({ length: 3 }))
+              );
+              setWinner(undefined);
+              setCurrentPlayer(players[0]);
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      )}
     </div>
   );
 }
