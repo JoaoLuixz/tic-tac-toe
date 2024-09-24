@@ -122,16 +122,7 @@ function registerPlay(
   player: Player,
   setPlayers: React.Dispatch<React.SetStateAction<Player[]>>,
   tile: { x: number; y: number },
-  board: string[][],
-  setSelectedTile: React.Dispatch<
-    React.SetStateAction<
-      | {
-          y: number;
-          x: number;
-        }
-      | undefined
-    >
-  >
+  board: string[][]
 ): string[][] {
   if (board[tile.y][tile.x] === "X" || board[tile.y][tile.x] === "O")
     return board;
@@ -140,8 +131,6 @@ function registerPlay(
 
   if (player.ownedTiles.length >= 3) {
     const olderPlay = player.ownedTiles.shift();
-
-    setSelectedTile(olderPlay);
 
     // @ts-ignore
     newBoard[olderPlay.y][olderPlay.x] = undefined;
@@ -180,8 +169,6 @@ function App() {
     { name: "P1", symbol: "X", ownedTiles: [] },
     { name: "P2", symbol: "O", ownedTiles: [] },
   ]);
-
-  const [selectedTile, setSelectedTile] = useState<{ y: number; x: number }>();
 
   const [currentPlayer, setCurrentPlayer] = useState<Player>(players[1]);
 
@@ -227,11 +214,14 @@ function App() {
                   }
                    
                   ${
-                    selectedTile?.y === rowIndex &&
-                    selectedTile.x === columnIndex
-                      ? currentPlayer.name === "P1"
-                        ? "bg-red-600"
-                        : "text-blue-600"
+                    currentPlayer.ownedTiles[0] &&
+                    currentPlayer.ownedTiles.length >= 3
+                      ? currentPlayer.ownedTiles[0].y === rowIndex &&
+                        currentPlayer.ownedTiles[0].x === columnIndex
+                        ? currentPlayer.name === "P1"
+                          ? "text-red-600"
+                          : "text-blue-600"
+                        : ""
                       : ""
                   }`}
                   onClick={() => {
@@ -242,8 +232,7 @@ function App() {
                         currentPlayer,
                         setPlayers,
                         { y: rowIndex, x: columnIndex },
-                        board as string[][],
-                        setSelectedTile
+                        board as string[][]
                       );
 
                       console.log("iae");
@@ -273,7 +262,6 @@ function App() {
               );
               setWinner(undefined);
               setCurrentPlayer(players[0]);
-              setSelectedTile(undefined);
             }}
           >
             Reset
