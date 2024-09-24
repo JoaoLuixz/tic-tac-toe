@@ -79,9 +79,11 @@ function checkWin({ ownedTiles }: Player, board: string[][]): boolean {
   //   }
   //}
 
-  // line win
+  // horizontal win
   if (
-    (board[0][0] === board[0][1] && board[0][1] === board[0][2]) ||
+    (board[0][0] === board[0][1] &&
+      board[0][1] === board[0][2] &&
+      board[0][2]) ||
     (board[1][0] === board[1][1] &&
       board[1][1] === board[1][2] &&
       board[1][2]) ||
@@ -174,21 +176,36 @@ function App() {
   }, [players]);
 
   return (
-    <div className="flex flex-col gap-10 items-center justify-center h-screen">
+    <div className="flex flex-col gap-10 items-center justify-center h-screen ">
       <div className="space-y-20">
         <p className="text-center text-4xl">{currentPlayer.name}</p>
       </div>
       <div>
-        <div className="flex justify-center items-center gap-10">
+        <div className="flex justify-center items-center   ">
           {board.map((row, rowIndex) => (
             <div
               key={`row-${rowIndex}`}
-              className="flex flex-col gap-5 text-5xl"
+              className="flex flex-col  text-5xl shadow-2xl"
             >
               {row.map((column, columnIndex) => (
                 <div
                   key={`column-${columnIndex}`}
-                  className="cursor-pointer p-2 border text-center border-white size-20 "
+                  className={`cursor-pointer p-2 text-center border-white  size-20  ${
+                    columnIndex === 0
+                      ? "border-b"
+                      : columnIndex === board.length - 1
+                      ? "border-t"
+                      : "border-y"
+                  } 
+
+                  ${
+                    rowIndex === 0
+                      ? "border-r"
+                      : rowIndex === board.length - 1
+                      ? "border-l"
+                      : "border-x"
+                  }
+                    `}
                   onClick={() => {
                     if (winner) return;
 
@@ -216,7 +233,9 @@ function App() {
       </div>
       {winner && (
         <div className="p-2 flex flex-col gap-2">
-          <p className="bg-green-600 rounded-md p-2">WINNER: {winner.name} </p>
+          <p className="bg-green-600 rounded-md p-2 text-center">
+            {winner.name === "Tie" ? winner.name : "Winner: " + winner.name}
+          </p>
           <button
             className="bg-blue-600 rounded-md p-2"
             onClick={() => {
